@@ -41,10 +41,11 @@ class MultiSlider extends StatefulWidget {
     this.inactiveTrackColors,
     this.markerColors,
     this.markerIcons,
-    this.activeTrackWidth,
-    this.inactiveTrackWidth,
+    this.activeTrackHeight,
+    this.inactiveTrackHeight,
     this.unselectedMarkerRadius,
     this.selectedMarkerRadius,
+    this.iconRotation,
     Key? key,
   })  : assert(divisions == null || divisions > 0),
         assert(max - min >= 0),
@@ -125,13 +126,15 @@ class MultiSlider extends StatefulWidget {
 
   final List<IconData>? markerIcons;
 
-  final double? activeTrackWidth;
+  final double? activeTrackHeight;
 
-  final double? inactiveTrackWidth;
+  final double? inactiveTrackHeight;
 
   final double? unselectedMarkerRadius;
 
   final double? selectedMarkerRadius;
+
+  final double? iconRotation;
 
   @override
   _MultiSliderState createState() => _MultiSliderState();
@@ -140,8 +143,8 @@ class MultiSlider extends StatefulWidget {
 class _MultiSliderState extends State<MultiSlider> {
   double? _maxWidth;
   int? _selectedInputIndex;
-  static const double _defaultActiveTrackWidth = 6;
-  static const double _defaultInactiveTrackWidth = 4;
+  static const double _defaultactiveTrackHeight = 6;
+  static const double _defaultInactiveTrackHeight = 4;
   static const double _defaultUnselectedMarkerRadius = 10;
   static const double _defaultSelectedMarkerRadius = 22.5;
 
@@ -186,14 +189,15 @@ class _MultiSliderState extends State<MultiSlider> {
                 inactiveTrackColors: widget.inactiveTrackColors ?? [],
                 markerColors: widget.markerColors ?? [],
                 markerIcons: widget.markerIcons ?? [],
-                activeTrackWidth:
-                    widget.activeTrackWidth ?? _defaultActiveTrackWidth,
-                inactiveTrackWidth:
-                    widget.inactiveTrackWidth ?? _defaultInactiveTrackWidth,
+                activeTrackHeight:
+                    widget.activeTrackHeight ?? _defaultactiveTrackHeight,
+                inactiveTrackHeight:
+                    widget.inactiveTrackHeight ?? _defaultInactiveTrackHeight,
                 unselectedMarkerRadius: widget.unselectedMarkerRadius ??
                     _defaultUnselectedMarkerRadius,
                 selectedMarkerRadius:
                     widget.selectedMarkerRadius ?? _defaultSelectedMarkerRadius,
+                iconRotation: widget.iconRotation ?? 0,
               ),
             ),
           ),
@@ -321,13 +325,14 @@ class _MultiSliderPainter extends CustomPainter {
   final List<Color> inactiveTrackColors;
   final List<Color> markerColors;
   final List<IconData> markerIcons;
-  final double activeTrackWidth;
-  final double inactiveTrackWidth;
+  final double activeTrackHeight;
+  final double inactiveTrackHeight;
   final double unselectedMarkerRadius;
   final double selectedMarkerRadius;
   final int? divisions;
   final ValueRangePainterCallback valueRangePainterCallback;
   final bool isDisabled;
+  final double iconRotation;
 
   _MultiSliderPainter({
     required this.isDisabled,
@@ -344,32 +349,33 @@ class _MultiSliderPainter extends CustomPainter {
     required this.inactiveTrackColors,
     required this.markerColors,
     required this.markerIcons,
-    required this.activeTrackWidth,
-    required this.inactiveTrackWidth,
+    required this.activeTrackHeight,
+    required this.inactiveTrackHeight,
     required this.unselectedMarkerRadius,
     required this.selectedMarkerRadius,
+    required this.iconRotation,
   })  : activeTrackColorPaint = paintFromColor(
           isDisabled ? disabledActiveTrackColor : activeTrackColor,
-          activeTrackWidth,
-          inactiveTrackWidth,
+          activeTrackHeight,
+          inactiveTrackHeight,
           true,
         ),
         inactiveTrackColorPaint = paintFromColor(
           isDisabled ? disabledInactiveTrackColor : inactiveTrackColor,
-          activeTrackWidth,
-          inactiveTrackWidth,
+          activeTrackHeight,
+          inactiveTrackHeight,
         ),
         bigCircleColorPaint = paintFromColor(
           activeTrackColor.withOpacity(0.20),
-          activeTrackWidth,
-          inactiveTrackWidth,
+          activeTrackHeight,
+          inactiveTrackHeight,
         );
 
   @override
   void paint(Canvas canvas, Size size) {
     final double halfHeight = size.height / 2;
-    final activeTrackEndCapRadius = activeTrackWidth / 2;
-    final inactiveTrackEndCapRadius = inactiveTrackWidth / 2;
+    final activeTrackEndCapRadius = activeTrackHeight / 2;
+    final inactiveTrackEndCapRadius = inactiveTrackHeight / 2;
 
     final canvasStart = horizontalPadding;
     final canvasEnd = size.width - horizontalPadding;
@@ -521,7 +527,7 @@ class _MultiSliderPainter extends CustomPainter {
       if (markerIcons.length > 0) {
         canvas.save();
         canvas.translate(x, halfHeight);
-        canvas.rotate(-math.pi / 2);
+        canvas.rotate(iconRotation);
 
         const fontPixelSize = 20.0;
         var icon = markerIcons[i];
@@ -533,9 +539,9 @@ class _MultiSliderPainter extends CustomPainter {
                 fontFamily: icon.fontFamily,
                 color: Colors.white));
         textPainter.layout();
-        textPainter.paint(canvas,
-            Offset(-fontPixelSize / 2, -fontPixelSize / 2));
-        
+        textPainter.paint(
+            canvas, Offset(-fontPixelSize / 2, -fontPixelSize / 2));
+
         canvas.restore();
       }
     }
@@ -545,17 +551,18 @@ class _MultiSliderPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 
   static Paint paintFromColor(
-      Color color, double activeTrackWidth, double inactiveTrackWidth,
+      Color color, double activeTrackHeight, double inactiveTrackHeight,
       [bool active = false]) {
     return Paint()
       ..style = PaintingStyle.fill
       ..color = color
-      ..strokeWidth = active ? activeTrackWidth : inactiveTrackWidth
+      ..strokeWidth = active ? activeTrackHeight : inactiveTrackHeight
       ..isAntiAlias = true;
   }
 
   Paint _paintFromColor(Color color, [bool active = false]) {
-    return paintFromColor(color, activeTrackWidth, inactiveTrackWidth, active);
+    return paintFromColor(
+        color, activeTrackHeight, inactiveTrackHeight, active);
   }
 }
 
